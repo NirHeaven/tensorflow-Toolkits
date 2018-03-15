@@ -168,10 +168,7 @@ def _fc(_input, out_dim, name="fc", relu_flag=True, stddev=0.01, dtype=dtypes.fl
         assert input_shape.ndims == 5 or input_shape.ndims == 4 or input_shape.ndims == 2
         if input_shape.ndims == 2:
             feed_in, dim = (_input, input_shape[-1].value)
-
         else:
-            if input_shape.ndims == 5: # if _input is conv3d result, we need to exchange the axes
-                _input = tf.transpose(_input, perm=[0, 1, 4, 2, 3])
             input_shape = _input.get_shape()
             dim = 1
             for dim_id in input_shape[1:].as_list():
@@ -211,7 +208,7 @@ def _dropout(_input, keep_prob=0.5, trn_flag=True, name="dropout"):
 
 def _mutli_layer_rnn(cell_size, batch_size=None, cell_type='LSTM', num_layers=1, \
                           is_drop_out=True, use_peepholes=True, return_zero_state=False,
-                     activation=None, name='mutli_layer_rnn'):
+                     activation=None, dtype=dtypes.float32, name='mutli_layer_rnn'):
     """
     A wrapped rnn structure generator
     **waring:**
@@ -247,7 +244,7 @@ def _mutli_layer_rnn(cell_size, batch_size=None, cell_type='LSTM', num_layers=1,
     mutli_layer = rnn_cell_impl.MultiRNNCell(cell)
     if return_zero_state:
         assert batch_size is not None
-        return mutli_layer, mutli_layer.zero_state(batch_size)
+        return mutli_layer, mutli_layer.zero_state(batch_size, dtype=dtype)
     return mutli_layer
 
 def _dynamic_rnn_wrapper(_input, batch_size, cell_size, num_layers=1, use_output='last', bi=False,

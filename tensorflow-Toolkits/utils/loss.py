@@ -8,9 +8,22 @@ from tensorflow.python.ops import array_ops
 from tensorflow.python.ops import variable_scope
 from tensorflow.python.ops import init_ops
 from tensorflow.python.ops import nn_ops
+from tensorflow.python.ops import ctc_ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import state_ops
 from tensorflow.python.framework import dtypes
+
+__all__= ['_ctc_loss_with_beam_search', '_cross_entropy_loss', '_center_loss']
+
+def _ctc_loss_with_beam_search(logits, sparse_labels, seq_length, top_path=1, merge_repeated=False):
+
+    ctc_loss = math_ops.reduce_mean(ctc_ops.ctc_loss(sparse_labels, logits, seq_length))
+    pre_label_tensors, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_length,
+                                                                merge_repeated=merge_repeated,
+                                                                top_paths=top_path)
+    top1_label_tensor = tf.cast(pre_label_tensors[0], dtypes.int32)
+    top1_ed = math_ops.reduce_mean(array_ops.edit_distance(top1_label_tensor, sparse_labels))
+    return ctc_loss, top1_ed, pre_label_tensors, log_prob
 
 def _cross_entropy_loss(logits, labels, one_hot=False):
     if one_hot:

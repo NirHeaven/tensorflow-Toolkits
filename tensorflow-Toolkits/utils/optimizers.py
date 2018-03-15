@@ -17,10 +17,6 @@ tf.app.flags.DEFINE_integer(
 tf.app.flags.DEFINE_float(
     'weight_decay', 0.00004, 'The weight decay on the model weights.')
 
-tf.app.flags.DEFINE_string(
-    'optimizer', 'adam',
-    'The name of the optimizer, one of "adadelta", "adagrad", "adam",'
-    '"ftrl", "momentum", "sgd" or "rmsprop".')
 
 tf.app.flags.DEFINE_float(
     'adadelta_rho', 0.95,
@@ -132,41 +128,39 @@ def _configure_learning_rate(num_samples_per_epoch, lr, batch_size, global_step)
                          FLAGS.learning_rate_decay_type)
 
 
-def _configure_optimizer(learning_rate):
-    if FLAGS.optimizer == 'adadelta':
+def _configure_optimizer(learning_rate, opt_type='adam'):
+    if opt_type == 'adadelta':
         optimizer = training.AdadeltaOptimizer(
             learning_rate,
             rho=FLAGS.adadelta_rho,
             epsilon=FLAGS.opt_epsilon)
-    elif FLAGS.optimizer == 'adagrad':
+    elif opt_type == 'adagrad':
         optimizer = training.AdagradOptimizer(
             learning_rate,
             initial_accumulator_value=FLAGS.adagrad_initial_accumulator_value)
-    elif FLAGS.optimizer == 'adam':
+    elif opt_type == 'adam':
         optimizer = training.AdamOptimizer(
             learning_rate,
-            beta1=FLAGS.adam_beta1,
-            beta2=FLAGS.adam_beta2,
-            epsilon=FLAGS.opt_epsilon)
-    elif FLAGS.optimizer == 'ftrl':
+)
+    elif opt_type == 'ftrl':
         optimizer = training.FtrlOptimizer(
             learning_rate,
             learning_rate_power=FLAGS.ftrl_learning_rate_power,
             initial_accumulator_value=FLAGS.ftrl_initial_accumulator_value,
             l1_regularization_strength=FLAGS.ftrl_l1,
             l2_regularization_strength=FLAGS.ftrl_l2)
-    elif FLAGS.optimizer == 'momentum':
+    elif opt_type == 'momentum':
         optimizer = training.MomentumOptimizer(
             learning_rate,
             momentum=FLAGS.momentum,
             name='Momentum')
-    elif FLAGS.optimizer == 'rmsprop':
+    elif opt_type == 'rmsprop':
         optimizer = training.RMSPropOptimizer(
             learning_rate,
             decay=FLAGS.rmsprop_decay,
             momentum=FLAGS.rmsprop_momentum,
             epsilon=FLAGS.opt_epsilon)
-    elif FLAGS.optimizer == 'sgd':
+    elif opt_type == 'sgd':
         optimizer = training.GradientDescentOptimizer(learning_rate)
     else:
         raise ValueError('Optimizer [%s] was not recognized', FLAGS.optimizer)
