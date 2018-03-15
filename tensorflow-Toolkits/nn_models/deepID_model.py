@@ -3,10 +3,13 @@
 # 2018.3.14;
 # Copyright (C) 2017 Shuang Yang, Mingmin Yang /@
 
+__all__ = ['deepID']
+
 from utils.layer_ops import *
 from utils.array_ops import *
 
-def deepID(frame_imgs, trn_Flag=True, keep_prob=0.5, out_channels=10, target_width=64, target_height=64, img_channel=3):
+
+def deepID(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width, img_channel])
 
     conv1 = _conv2d(frame_imgs, 20, 5, 5, 1, 1, name='deepID_conv1')
@@ -31,7 +34,8 @@ def deepID(frame_imgs, trn_Flag=True, keep_prob=0.5, out_channels=10, target_wid
     flat4 = _flattern(relu4, axis=0, name='deepID_flat4')
 
     concat_34 = _concat(flat3, flat4, axis=1, name='deepID_concat34')
-
+    if return_fea_map:
+        return concat_34
     fc1 = _fc(concat_34, 1024, name='deepID_fc1', relu_flag=False)
     bn_fc1 = _batch_norm(fc1, trnFlag=trn_Flag,  name='deepID_bn_fc1')
     relu_fc1 = _relu(bn_fc1, name='deepID_relu_fc1')

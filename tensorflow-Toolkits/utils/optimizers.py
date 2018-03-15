@@ -10,6 +10,7 @@ from tensorflow.python.framework import constant_op
 # Optimizer Flags #
 #######################
 
+__all__ = ['_configure_learning_rate', '_configure_optimizer']
 tf.app.flags.DEFINE_integer(
     'max_grad_norm', 5, 'The max gradient in LSTM to be truncated')
 
@@ -70,7 +71,7 @@ tf.app.flags.DEFINE_string(
     'Specifies how the learning rate is decayed. One of "fixed", "exponential",'
     ' or "polynomial"')
 
-tf.app.flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
+tf.app.flags.DEFINE_float('learning_rate', 0.00001, 'Initial learning rate.')
 
 tf.app.flags.DEFINE_float(
     'end_learning_rate', 0.0001,
@@ -104,7 +105,7 @@ FLAGS = tf.app.flags.FLAGS
 
 def _configure_learning_rate(num_samples_per_epoch, global_step):
 
-    decay_steps = int(num_samples_per_epoch / FLAGS.batch_size *
+    decay_steps = int(num_samples_per_epoch / 48 *
                       FLAGS.num_epochs_per_decay)
     if FLAGS.sync_replicas:
         decay_steps /= FLAGS.replicas_to_aggregate

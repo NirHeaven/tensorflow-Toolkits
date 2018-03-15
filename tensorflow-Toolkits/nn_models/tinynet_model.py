@@ -4,8 +4,8 @@
 # Copyright (C) 2017 Shuang Yang, Mingmin Yang /@
 
 from utils.layer_ops import *
-
-def tinynet(frame_imgs,  trn_Flag=True, keep_prob=0.5, out_num=10, target_width=64, target_height=64, img_channel=3):
+__all__ = ['tinynet']
+def tinynet(frame_imgs,  trn_Flag, keep_prob=0.5, out_num=10, return_fea_map=True):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width, img_channel])
 
     conv_pre = _conv2d(frame_imgs, 8, 5, 5, 2, 2, stddev=0.07142857142857142, name='tiny_conv_pre')
@@ -38,7 +38,8 @@ def tinynet(frame_imgs,  trn_Flag=True, keep_prob=0.5, out_num=10, target_width=
     conv3_2 = _conv2d(relu3_1, 160, 3, 3, 1, 1, stddev=0.08333333333333333, name='tiny_conv3_2')
     bn_conv3_2 = _batch_norm(conv3_2, trnFlag=trn_Flag, name='tiny_bn_conv3_2')
     relu3_2 = _relu(bn_conv3_2, name='tiny_relu3_2')
-
+    if return_fea_map:
+        relu3_2
     fc1 = _fc(relu3_2, 4096, name='tiny_fc1', relu_flag=False, stddev=0.001)
     bn_fc1 = _batch_norm(fc1, trnFlag=trn_Flag, name='tiny_bn_fc1')
     relu_fc1 = _relu(bn_fc1, name='tiny_relu_fc1')

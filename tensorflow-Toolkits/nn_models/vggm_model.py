@@ -5,8 +5,8 @@
 
 from utils.layer_ops import *
 from utils.array_ops import *
-
-def vggm(frame_imgs, trn_Flag=True, keep_prob=0.5, out_channels=10, target_width=64, target_height=64, img_channel=3):
+__all__ = ['vggm']
+def vggm(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
     conv2 = _conv2d(frame_imgs, 96, 1, 1, 1, 1, name='vggm_conv2')
     bn2 = _batch_norm(conv2, trnFlag=trn_Flag, name='vggm_bn2')
     relu2 = _relu(bn2, name='vggm_relu2')
@@ -29,7 +29,8 @@ def vggm(frame_imgs, trn_Flag=True, keep_prob=0.5, out_channels=10, target_width
     bn6 = _batch_norm(conv6, trnFlag=trn_Flag, name='vggm_bn6')
     relu6 = _relu(bn6, name='vggm_relu6')
     pool6 = _max_pool_2d(relu6, 3, 3, 2, 2, name='vggm_pool6')
-
+    if return_fea_map:
+        return pool6
     fc1 = _fc(pool6, 4096, name="vggm_fc1")
     bn_fc1 = _batch_norm(fc1, trnFlag=trn_Flag, name='vggm_bn_fc1')
     relu_fc1 = _relu(bn_fc1, name='vggm_relu_fc1')

@@ -4,8 +4,8 @@
 # Copyright (C) 2017 Shuang Yang, Mingmin Yang /@
 
 from utils.layer_ops import *
-
-def sg_full(frame_imgs, trn_Flag=True, keep_prob=0.5, out_num=10, target_width=90, target_height=90, img_channel=3):
+__all__ = ['sg', 'sg_full']
+def sg_full(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width,  img_channel])
 
     conv1 = _conv2d(frame_imgs, 48, 5, 5, 2, 2, name='sg_conv1')
@@ -60,17 +60,17 @@ def sg_full(frame_imgs, trn_Flag=True, keep_prob=0.5, out_num=10, target_width=9
     relu_fc1 = _relu(bn_fc1, name='sg_fc1_relu')
     drop_fc1 = _dropout(relu_fc1, keep_prob=keep_prob, trn_flag=trn_Flag, name='sg_fc1_drop')
 
-    fc2 = _fc(drop_fc1, out_num, relu_flag=False, name='sg_fc2')
+    fc2 = _fc(drop_fc1, out_channels, relu_flag=False, name='sg_fc2')
     bn_fc2 = _batch_norm(fc2, trnFlag=trn_Flag, name='sg_fc2_bn')
     relu_fc2 = _relu(bn_fc2, name='sg_fc2_relu')
     drop_fc2 = _dropout(relu_fc2, keep_prob=keep_prob, trn_flag=trn_Flag, name='sg_fc2_drop')
 
-    fc3 = _fc(drop_fc2, out_num, relu_flag=False, name='sg_fc3')
+    fc3 = _fc(drop_fc2, out_channels, relu_flag=False, name='sg_fc3')
 
     return relu_fc2
 
 
-def sg(frame_imgs, trn_Flag=True, keep_prob=0.5, out_num=10, target_width=90, target_height=90, img_channel=3):
+def sg(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width,  img_channel])
 
     conv1 = _conv2d(frame_imgs, 48, 5, 5, 2, 2, name='sg_conv1')
@@ -120,12 +120,15 @@ def sg(frame_imgs, trn_Flag=True, keep_prob=0.5, out_num=10, target_width=90, ta
     relu6 = _relu(bn6, name='sg_conv6_relu')
     max6 = _max_pool_2d(relu6, 3, 3, 2, 2, name='sg_conv6_pool')
 
+    if return_fea_map:
+        return max6
+
     fc1 = _fc(max6, 4096, relu_flag=False, name='sg_fc1')
     bn_fc1 = _batch_norm(fc1, trnFlag=trn_Flag, name='sg_fc1_bn')
     relu_fc1 = _relu(bn_fc1, name='sg_fc1_relu')
     drop_fc1 = _dropout(relu_fc1, keep_prob=keep_prob, trn_flag=trn_Flag, name='sg_fc1_drop')
 
-    fc2 = _fc(drop_fc1, out_num, relu_flag=False, name='sg_fc2')
+    fc2 = _fc(drop_fc1, out_channels, relu_flag=False, name='sg_fc2')
     bn_fc2 = _batch_norm(fc2, trnFlag=trn_Flag, name='sg_fc2_bn')
     relu_fc2 = _relu(bn_fc2, name='sg_fc2_relu')
     # drop_fc2 = dropout(relu_fc2, keep_prob=keep_prob, trn_flag=trn_Flag, name='sg_fc2_drop')

@@ -5,7 +5,9 @@
 
 from utils.layer_ops import *
 
-def lenet(frame_imgs, trn_Flag=True, keep_prob=0.5, out_num=10, target_width=64, target_height=64, img_channel=3):
+__all__ = ['lenet']
+
+def lenet(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
     # target_heigth =28
     # target_width = 28
     # img_channel = 1
@@ -20,8 +22,9 @@ def lenet(frame_imgs, trn_Flag=True, keep_prob=0.5, out_num=10, target_width=64,
     bn2 = _batch_norm(conv2, trnFlag=trn_Flag, name='lenet_bn2')
     # bn2 = tf.contrib.layers.batch_norm(conv2, center=True, scale=True, is_training=trn_Flag, scope='lenet_bn2')
     max1 = _max_pool_2d(bn2, 2, 2, 2, 2, name='lenet_conv2_pool')
-
-    fc1 = _fc(max1, out_num, name='lenet_fc1', relu_flag=True)
+    if return_fea_map:
+        return max1
+    fc1 = _fc(max1, out_channels, name='lenet_fc1', relu_flag=True)
     bn3 = _batch_norm(fc1, trnFlag=trn_Flag, name='lenet_bn3')
     # bn3 = tf.contrib.layers.batch_norm(fc1, center=True, scale=True, is_training=trn_Flag, scope='lenet_bn3')
     # fc2 = fc(bn3, out_num, name='lenet_fc2', relu_flag=False)

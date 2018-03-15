@@ -19,7 +19,7 @@ from tensorflow.python.framework import ops
 from tensorflow.python.framework import dtypes
 from tensorflow.contrib.seq2seq.python.ops import attention_wrapper as att_w
 
-__all__ = ['_conv2d', '_conv3d', '_relu', '_max_pool_2d', '_max_pool_3d'
+__all__ = ['_conv2d', '_conv3d', '_relu', '_max_pool_2d', '_max_pool_3d',
            '_channel_wise_max_pool', '_batch_norm', '_fc', '_dropout',
            '_mutli_layer_rnn', '_attention_decoder_wrapper', '_eltwise_sum',
            '_rns', '_eltwise_sum_conv2d']
@@ -41,7 +41,7 @@ def _conv2d(_input, out_channels, kh=5, kw=5, sh=2, sw=2, stddev=0.01, padding='
         tensor, convolution result which has the same shape length as _input
     """
     with variable_scope.variable_scope(name) as scope:
-        weights = variable_scope.get_variable('w', [kh, kw, array_ops.shape(_input)[-1], out_channels], dtype=dtype,
+        weights = variable_scope.get_variable('w', [kh, kw, _input.shape[-1].value, out_channels], dtype=dtype,
                         initializer=init_ops.truncated_normal_initializer(stddev=stddev, dtype=dtype, seed=20170705))
 
         conv = nn_ops.conv2d(_input, weights, strides=[1, sh, sw, 1], padding=padding)
@@ -73,7 +73,7 @@ def _conv3d(_input, out_channels, kd=3, kh=3, kw=3, sd=1, sh=1, sw=1, stddev=0.0
         tensor, convolution result which has the same shape length as _input
     """
     with variable_scope.variable_scope(name):
-        weights = variable_scope.get_variable('w', [kd, kh, kw, array_ops.shape(_input)[-1], out_channels], dtype=dtype,
+        weights = variable_scope.get_variable('w', [kd, kh, kw, _input.shape[-1].value, out_channels], dtype=dtype,
                                               initializer=init_ops.truncated_normal_initializer(stddev=stddev,
                                                                                                 dtype=dtype,
                                                                                                 seed=20170705))
@@ -109,7 +109,7 @@ def _channel_wise_max_pool(_input, keep_dims=False):
     return tf.reduce_max(_input, reduction_indices=[-1], keep_dims=keep_dims)
 
 
-def _batch_norm(_input, eps=1e-3, trnFlag=True, name="batch_norm", ema_decay=0.5, dtype=dtypes.float32):
+def _batch_norm(_input, trnFlag, eps=1e-3, name="batch_norm", ema_decay=0.5, dtype=dtypes.float32):
     """
     A wrapped BN operation used for 2D or 3D convolution as described in:
 
@@ -124,7 +124,7 @@ def _batch_norm(_input, eps=1e-3, trnFlag=True, name="batch_norm", ema_decay=0.5
     :return:
         tensor, BN reuslt which has the same shape as _input
     """
-    shape = array_ops.shape(_input).as_list()
+    shape = _input.get_shape().as_list()
     with variable_scope.variable_scope(name) as scope:
         beta = variable_scope.get_variable("beta", [shape[-1]], dtype=dtype, initializer=init_ops.constant_initializer(0., dtype=dtype), trainable=True)
         gamma = variable_scope.get_variable("gamma", [shape[-1]], dtype=dtype, initializer=init_ops.random_normal_initializer(1., 0.01, dtype=dtype, seed=20170705), trainable=True)
@@ -162,7 +162,7 @@ def _fc(_input, out_dim, name="fc", relu_flag=True, stddev=0.01, dtype=dtypes.fl
         tensor, shape = [_input.shape[0], out_dim]
     """
     with variable_scope.variable_scope(name) as scope:
-        input_shape = array_ops.shape(_input)
+        input_shape = _input.get_shape()
         # print 'shape-----------', input_shape
         assert input_shape.ndims == 5 or input_shape.ndims == 4 or input_shape.ndims == 2
         if input_shape.ndims == 2:
@@ -171,7 +171,7 @@ def _fc(_input, out_dim, name="fc", relu_flag=True, stddev=0.01, dtype=dtypes.fl
         else:
             if input_shape.ndims == 5: # if _input is conv3d result, we need to exchange the axes
                 _input = tf.transpose(_input, perm=[0, 1, 4, 2, 3])
-            input_shape = array_ops.shape(_input)
+            input_shape = _input.get_shape()
             dim = 1
             for dim_id in input_shape[1:].as_list():
                 dim *= dim_id
@@ -232,9 +232,9 @@ def _mutli_layer_rnn(cell_size, batch_size=None, cell_type='LSTM', num_layers=1,
 
     if cell_type == 'LSTM':
         c_type = rnn_cell_impl.LSTMCell
-    elif cell_type == 'GRU':
-        c_type = rnn_cell_impl.GRUCell
-        use_peepholes = False
+    # elif cell_type == 'GRU':
+    #     c_type = rnn_cell_impl.GRUCell
+    #     use_peepholes = False
     else:
         raise 'Invalid cell type , try to use "LSTM" or "GRU"'
 
@@ -337,8 +337,8 @@ def _eltwise_sum(input_1, input_2, name="eltwise_sum"):
 
     """
     with tf.variable_scope(name) as scope:
-        shape1 = array_ops.shape(input_1).as_list()
-        shape2 = array_ops.shape(input_2).as_list()
+        shape1 = input_1.get_shape().as_list()
+        shape2 = input_2.get_shape().as_list()
         assert shape1.__len__() == shape2.__len__()
         out = math_ops.add(input_1, input_2)
     return out

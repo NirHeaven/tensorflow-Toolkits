@@ -4,8 +4,8 @@
 # Copyright (C) 2017 Shuang Yang, Mingmin Yang /@
 
 from utils.layer_ops import *
-
-def resnet80(frame_imgs, trn_Flag=True, keep_prob=0.5, out_channels=10, target_width=64, target_height=64, img_channel=3):
+__all__ = ['resnet80']
+def resnet80(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width, img_channel])
 
     bn1 = _batch_norm(frame_imgs, trnFlag=trn_Flag, name='resnet80_bn1')
@@ -79,7 +79,8 @@ def resnet80(frame_imgs, trn_Flag=True, keep_prob=0.5, out_channels=10, target_w
     d_pool = _max_pool_2d(d_rns, 3, 3, sh=2, sw=2, name='resnet80_d_pool')
     bn84 = _batch_norm(d_pool, trnFlag=trn_Flag, name='resnet80_bn84')
     relu79 = _relu(bn84, name='resnet80_relu79')
-
+    if return_fea_map:
+        return relu79
     fc1 = _fc(relu79, out_channels, relu_flag=False, name='resnet80_fc1')
     bn85 = _batch_norm(fc1, trnFlag=trn_Flag, name='resnet80_bn85')
     relu80 = _relu(bn85, name='resnet80_relu80')
