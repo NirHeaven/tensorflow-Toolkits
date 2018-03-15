@@ -71,7 +71,7 @@ tf.app.flags.DEFINE_string(
     'Specifies how the learning rate is decayed. One of "fixed", "exponential",'
     ' or "polynomial"')
 
-tf.app.flags.DEFINE_float('learning_rate', 0.00001, 'Initial learning rate.')
+tf.app.flags.DEFINE_float('learning_rate', 0.0001, 'Initial learning rate.')
 
 tf.app.flags.DEFINE_float(
     'end_learning_rate', 0.0001,
@@ -105,7 +105,7 @@ FLAGS = tf.app.flags.FLAGS
 
 def _configure_learning_rate(num_samples_per_epoch, global_step):
 
-    decay_steps = int(num_samples_per_epoch / 48 *
+    decay_steps = int(num_samples_per_epoch / 24 *
                       FLAGS.num_epochs_per_decay)
     if FLAGS.sync_replicas:
         decay_steps /= FLAGS.replicas_to_aggregate

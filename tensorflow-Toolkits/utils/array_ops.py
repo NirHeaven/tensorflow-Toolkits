@@ -23,8 +23,9 @@ def _flattern(_input, axis=0, name="flattern"):
         tensor, shape = [_input.shape[axis], -1]
     """
     # input: [batch_size, ....]
+    array_ops.squeeze()
     with variable_scope.variable_scope(name) as scope:
-        shape =_input.shape.as_list()
+        shape = array_ops.shape(_input).as_list()
         if shape.__len__() < 2:
             raise ValueError('Inputs must have a least 2 dimensions.')
         dim = shape[axis]
@@ -36,8 +37,8 @@ def _concat(input_1, input_2, axis=-1, name="concat"):
     concat two tensors at the given 'axis'
     """
     with variable_scope.variable_scope(name) as scope:
-        shape1 = input_1.shape.as_list()
-        shape2 = input_2.shape.as_list()
+        shape1 = array_ops.shape(input_1).as_list()
+        shape2 = array_ops.shape(input_2).as_list()
         assert shape1.__len__() == shape2.__len__()
         out = array_ops.concat([input_1, input_2], axis=axis)
     return out
@@ -107,8 +108,8 @@ def _sparsemax(logits, name=None):
 
     with ops.name_scope(name, "sparsemax", [logits]) as name:
         logits = ops.convert_to_tensor(logits, name="logits")
-        obs = logits.shape[0]
-        dims = logits.shape[1]
+        obs = array_ops.shape(logits)[0]
+        dims = array_ops.shape(logits)[1]
 
         z = logits - math_ops.reduce_mean(logits, axis=1)[:, array_ops.newaxis]
 
@@ -148,6 +149,6 @@ def _hardmax(logits, name=None):
         if logits.get_shape()[-1].value is not None:
             depth = logits.get_shape()[-1].value
         else:
-            depth = logits.shape[-1]
+            depth = array_ops.shape(logits)[-1]
         return array_ops.one_hot(
         math_ops.argmax(logits, -1), depth, dtype=logits.dtype)
