@@ -5,7 +5,8 @@
 
 from utils.layer_ops import *
 __all__ = ['tinynet']
-def tinynet(frame_imgs,  trn_Flag, keep_prob=0.5, out_num=10, return_fea_map=True):
+
+def tinynet(frame_imgs,  trn_Flag, keep_prob=0.5, out_num=10, return_fea_map=False):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width, img_channel])
 
     conv_pre = _conv2d(frame_imgs, 8, 5, 5, 2, 2, stddev=0.07142857142857142, name='tiny_conv_pre')

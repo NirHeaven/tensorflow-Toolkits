@@ -18,11 +18,12 @@ from tensorflow.python.training import training
 from tensorflow.python.framework import ops
 from tensorflow.python.framework import dtypes
 from tensorflow.contrib.seq2seq.python.ops import attention_wrapper as att_w
+from tensorflow.contrib import rnn
 
 __all__ = ['_conv2d', '_conv3d', '_relu', '_max_pool_2d', '_max_pool_3d',
            '_channel_wise_max_pool', '_batch_norm', '_fc', '_dropout',
            '_mutli_layer_rnn', '_attention_decoder_wrapper', '_eltwise_sum',
-           '_rns', '_eltwise_sum_conv2d']
+           '_rns', '_eltwise_sum_conv2d', '_dynamic_rnn_wrapper']
 
 def _conv2d(_input, out_channels, kh=5, kw=5, sh=2, sw=2, stddev=0.01, padding='SAME',
            name="conv2d", dtype=dtypes.float32, bias_add=True):
@@ -209,7 +210,8 @@ def _dropout(_input, keep_prob=0.5, trn_flag=True, name="dropout"):
 
 
 def _mutli_layer_rnn(cell_size, batch_size=None, cell_type='LSTM', num_layers=1, \
-                          is_drop_out=True, use_peepholes=True, return_zero_state=False):
+                          is_drop_out=True, use_peepholes=True, return_zero_state=False,
+                     activation=None, name='mutli_layer_rnn'):
     """
     A wrapped rnn structure generator
     **waring:**
@@ -224,26 +226,73 @@ def _mutli_layer_rnn(cell_size, batch_size=None, cell_type='LSTM', num_layers=1,
     :return:
         a mutli-layer rnn structure
     """
-    def _rnn_cell(cell_type, cell_size, is_drop_out=True, _dropout_in=1.0, _dropout_out=0.5, use_peepholes=True):
-        cell = cell_type(num_units=cell_size, forget_bias=1.0, use_peepholes=use_peepholes)
+    def _rnn_cell(cell_type, cell_size, is_drop_out=True, _dropout_in=1.0,
+                  _dropout_out=0.5, use_peepholes=True, activation=None):
+        if isinstance(cell_type, rnn_cell_impl.LSTMCell):
+            cell = cell_type(num_units=cell_size, use_peepholes=use_peepholes, activation=activation)
+        else:
+            cell = cell_type(num_units=cell_size, activation=activation)
         if is_drop_out:
             cell = rnn_cell_impl.DropoutWrapper(cell=cell, input_keep_prob=_dropout_in, output_keep_prob=_dropout_out)
         return cell
 
     if cell_type == 'LSTM':
         c_type = rnn_cell_impl.LSTMCell
-    # elif cell_type == 'GRU':
-    #     c_type = rnn_cell_impl.GRUCell
-    #     use_peepholes = False
+    elif cell_type == 'GRU':
+        c_type = rnn_cell_impl.GRUCell
     else:
         raise 'Invalid cell type , try to use "LSTM" or "GRU"'
 
-    cell = [_rnn_cell(c_type, cell_size, is_drop_out=is_drop_out, use_peepholes=use_peepholes) for i in range(num_layers)]
+    cell = [_rnn_cell(c_type, cell_size, is_drop_out=is_drop_out, use_peepholes=use_peepholes, activation=activation) for i in range(num_layers)]
     mutli_layer = rnn_cell_impl.MultiRNNCell(cell)
     if return_zero_state:
         assert batch_size is not None
         return mutli_layer, mutli_layer.zero_state(batch_size)
     return mutli_layer
+
+def _dynamic_rnn_wrapper(_input, batch_size, cell_size, num_layers=1, use_output='last', bi=False,
+                         seq_length=None, initial_state=None, dtype=dtypes.float32, name='dynamic_rnn', keep_dim=False):
+    """
+    A wrapper for dynamic rnn
+    :param _input: tensor, [batch_size, max_time_step, input_dim]
+    :param batch_size: scalar
+    :param cell_size: scalar, number of cells used in rnn
+    :param num_layers: scalar, number of layers stacked in rnn
+    :param use_output: string ('all' or 'last'),
+        whether to return all the output or only the final time step's output
+    :param bi:
+    :param seq_length: 1D list, array or tensor, [batch_size], sequence length for each sample in current batch
+    :param initial_state: LSTMStateTuple, state to initialize rnn at time step 0
+    :param keep_dim: bool, only used when use_output is 'last'
+        if keep_dim is True, outout = [batch_size, 1, cell_size]
+        if keep_dim is False, outout = [batch_size, cell_size]
+
+    :return:
+    """
+    mutli_layer_fw, states = _mutli_layer_rnn(cell_size, batch_size, num_layers=num_layers, return_zero_state=True)
+
+    if initial_state:
+        states = initial_state
+    if not bi:
+        output, states = tf.nn.dynamic_rnn(mutli_layer_fw, _input, sequence_length=seq_length, initial_state=states)
+    else:
+        mutli_layer_bw = _mutli_layer_rnn(cell_size, batch_size, num_layers=num_layers)
+        (output_fw, output_bw), states = tf.nn.bidirectional_dynamic_rnn(mutli_layer_fw, mutli_layer_bw, _input, sequence_length=seq_length, dtype=dtype)
+        output = array_ops.concat((output_fw, output_bw), 1)
+
+    max_seq_len = output.shape[1]
+    reshape_outs = array_ops.reshape(output, [-1, cell_size])  # [B*T, cell_size]
+
+    if use_output == 'last':
+        # only last time-step
+        assert seq_length is not None
+
+        seq_last_index = math_ops.range(0, batch_size) * max_seq_len + (seq_length - 1)
+        output = array_ops.gather(reshape_outs, seq_last_index)  # [B, cell_size]
+        if keep_dim:
+            output = array_ops.expand_dims(output, 1)
+
+    return output, states
 
 
 def _attention_decoder_wrapper(batch_size, num_units, memory, mutli_layer, dtype=dtypes.float32 ,\

@@ -71,7 +71,7 @@ tf.app.flags.DEFINE_string(
     'Specifies how the learning rate is decayed. One of "fixed", "exponential",'
     ' or "polynomial"')
 
-tf.app.flags.DEFINE_float('learning_rate', 0.0001, 'Initial learning rate.')
+tf.app.flags.DEFINE_float('learning_rate', 0.00001, 'Initial learning rate.')
 
 tf.app.flags.DEFINE_float(
     'end_learning_rate', 0.0001,
@@ -103,24 +103,24 @@ tf.app.flags.DEFINE_float(
 
 FLAGS = tf.app.flags.FLAGS
 
-def _configure_learning_rate(num_samples_per_epoch, global_step):
+def _configure_learning_rate(num_samples_per_epoch, lr, batch_size, global_step):
 
-    decay_steps = int(num_samples_per_epoch / 24 *
+    decay_steps = int(num_samples_per_epoch / batch_size *
                       FLAGS.num_epochs_per_decay)
     if FLAGS.sync_replicas:
         decay_steps /= FLAGS.replicas_to_aggregate
 
     if FLAGS.learning_rate_decay_type == 'exponential':
-        return training.exponential_decay(FLAGS.learning_rate,
+        return training.exponential_decay(lr,
                                           global_step,
                                           decay_steps,
                                           FLAGS.learning_rate_decay_factor,
                                           staircase=True,
                                           name='exponential_decay_learning_rate')
     elif FLAGS.learning_rate_decay_type == 'fixed':
-        return constant_op.constant(FLAGS.learning_rate, name='fixed_learning_rate')
+        return constant_op.constant(lr, name='fixed_learning_rate')
     elif FLAGS.learning_rate_decay_type == 'polynomial':
-        return training.polynomial_decay(FLAGS.learning_rate,
+        return training.polynomial_decay(lr,
                                          global_step,
                                          decay_steps,
                                          FLAGS.end_learning_rate,

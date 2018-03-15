@@ -4,9 +4,9 @@
 # Copyright (C) 2017 Shuang Yang, Mingmin Yang /@
 
 from utils.layer_ops import *
-from utils.array_ops import *
+from utils.tensor_ops import *
 __all__ = ['vggm']
-def vggm(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
+def vggm(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False):
     conv2 = _conv2d(frame_imgs, 96, 1, 1, 1, 1, name='vggm_conv2')
     bn2 = _batch_norm(conv2, trnFlag=trn_Flag, name='vggm_bn2')
     relu2 = _relu(bn2, name='vggm_relu2')

@@ -12,6 +12,13 @@ from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import state_ops
 from tensorflow.python.framework import dtypes
 
+def _cross_entropy_loss(logits, labels, one_hot=False):
+    if one_hot:
+        loss = math_ops.reduce_mean(nn_ops.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits))
+    else:
+        loss = math_ops.reduce_mean(nn_ops.softmax_cross_entropy_with_logits(labels=labels, logits=logits))
+
+    return loss
 
 def _center_loss(logit, labels, alpha, lam, num_classes, dtype=dtypes.float32):
     """

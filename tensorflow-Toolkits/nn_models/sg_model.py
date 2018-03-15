@@ -5,7 +5,7 @@
 
 from utils.layer_ops import *
 __all__ = ['sg', 'sg_full']
-def sg_full(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
+def sg_full(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width,  img_channel])
 
     conv1 = _conv2d(frame_imgs, 48, 5, 5, 2, 2, name='sg_conv1')
@@ -55,6 +55,9 @@ def sg_full(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map
     relu6 = _relu(bn6, name='sg_conv6_relu')
     max6 = _max_pool_2d(relu6, 3, 3, 2, 2, name='sg_conv6_pool')
 
+    if return_fea_map:
+        return max6
+
     fc1 = _fc(max6, 4096, relu_flag=False, name='sg_fc1')
     bn_fc1 = _batch_norm(fc1, trnFlag=trn_Flag, name='sg_fc1_bn')
     relu_fc1 = _relu(bn_fc1, name='sg_fc1_relu')
@@ -70,7 +73,7 @@ def sg_full(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map
     return relu_fc2
 
 
-def sg(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
+def sg(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width,  img_channel])
 
     conv1 = _conv2d(frame_imgs, 48, 5, 5, 2, 2, name='sg_conv1')

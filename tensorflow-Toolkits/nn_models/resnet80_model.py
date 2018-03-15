@@ -5,7 +5,7 @@
 
 from utils.layer_ops import *
 __all__ = ['resnet80']
-def resnet80(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
+def resnet80(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width, img_channel])
 
     bn1 = _batch_norm(frame_imgs, trnFlag=trn_Flag, name='resnet80_bn1')

@@ -7,7 +7,7 @@ from utils.layer_ops import *
 
 __all__ = ['lenet']
 
-def lenet(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
+def lenet(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False):
     # target_heigth =28
     # target_width = 28
     # img_channel = 1

@@ -6,10 +6,10 @@
 __all__ = ['deepID']
 
 from utils.layer_ops import *
-from utils.array_ops import *
+from utils.tensor_ops import *
 
 
-def deepID(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=True):
+def deepID(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width, img_channel])
 
     conv1 = _conv2d(frame_imgs, 20, 5, 5, 1, 1, name='deepID_conv1')
