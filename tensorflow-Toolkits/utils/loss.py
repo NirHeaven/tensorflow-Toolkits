@@ -21,7 +21,7 @@ def _ctc_loss_with_beam_search(logits, sparse_labels, seq_length, top_path=1, me
     pre_label_tensors, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_length,
                                                                 merge_repeated=merge_repeated,
                                                                 top_paths=top_path)
-    top1_label_tensor = tf.cast(pre_label_tensors[0], dtypes.int32)
+    top1_label_tensor = math_ops.cast(pre_label_tensors[0], dtypes.int32)
     top1_ed = math_ops.reduce_mean(array_ops.edit_distance(top1_label_tensor, sparse_labels))
     return ctc_loss, top1_ed, pre_label_tensors, log_prob
 
