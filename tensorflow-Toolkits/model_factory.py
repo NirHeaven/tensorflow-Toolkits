@@ -65,15 +65,14 @@ class model_assemble(object):
     def inference(self):
         f_output = None
         for c, component in enumerate(self._layers_list):
-            n = c + 1
-            if n == 1:
-                f_output = component(**self._params['component_' + str(n)])
+            if c == 0:
+                f_output = component(**self._params['component_' + str(c + 1)])
 
             else:
                 if 'shape' in self._params['component_' + str(c + 1)]:
-                    f_output = tf.reshape(f_output, self._params['component_' + str(n)]['shape'])
+                    f_output = tf.reshape(f_output, self._params['component_' + str(c + 1)]['shape'])
                     self._params['component_' + str(c + 1)].pop('shape')
-                f_output = component(f_output, **self._params['component_' + str(n)])
+                f_output = component(f_output, **self._params['component_' + str(c + 1)])
         if self._logit_shape:
             self._logits = tf.reshape(f_output, self._logit_shape)
         else:
