@@ -8,10 +8,10 @@ from tensorflow.python.ops import variable_scope
 
 __all__ = ['tinynet']
 
-def tinynet(frame_imgs,  trn_Flag, keep_prob=0.5, out_num=10, return_fea_map=False, name='tinynet'):
+def tinynet(_input,  trn_Flag, keep_prob=0.5, out_num=10, return_fea_map=False, name='tinynet'):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width, img_channel])
     with variable_scope.variable_scope(name):
-        conv_pre = _conv2d(frame_imgs, 8, 5, 5, 2, 2, stddev=0.07142857142857142, name='tiny_conv_pre')
+        conv_pre = _conv2d(_input, 8, 5, 5, 2, 2, stddev=0.07142857142857142, name='tiny_conv_pre')
         bn_pre = _batch_norm(conv_pre, trnFlag=trn_Flag, name='tiny_bn_pre')
         relu_pre = _relu(bn_pre, name='tiny_relu_pre')
         max_pre = _max_pool_2d(relu_pre, 2, 2, sh=2, sw=2, name='tiny_pool_pre')

@@ -10,10 +10,10 @@ from utils.tensor_ops import *
 from tensorflow.python.ops import variable_scope
 
 
-def deepID(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False, name='deepId'):
+def deepID(_input, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False, name='deepId'):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width, img_channel])
     with variable_scope.variable_scope(name):
-        conv1 = _conv2d(frame_imgs, 20, 5, 5, 1, 1, name='deepID_conv1')
+        conv1 = _conv2d(_input, 20, 5, 5, 1, 1, name='deepID_conv1')
         bn1 = _batch_norm(conv1, trnFlag=trn_Flag, name='deepID_bn1')
         relu1 = _relu(bn1, name='deepID_relu1')
         max1 = _max_pool_2d(relu1, 2, 2, 2, 2, name='deepID_pool1')

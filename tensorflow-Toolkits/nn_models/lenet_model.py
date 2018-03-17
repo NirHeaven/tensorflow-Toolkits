@@ -8,13 +8,13 @@ from tensorflow.python.ops import variable_scope
 
 __all__ = ['lenet']
 
-def lenet(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False, name='lanet'):
+def lenet(_input, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False, name='lanet'):
     # target_heigth =28
     # target_width = 28
     # img_channel = 1
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_width, target_height, img_channel])
     with variable_scope.variable_scope(name):
-        conv1 = _conv2d(frame_imgs, 20, 5, 5, 1, 1, name='lenet_conv1')
+        conv1 = _conv2d(_input, 20, 5, 5, 1, 1, name='lenet_conv1')
         bn1 = _batch_norm(conv1, trnFlag=trn_Flag, name='lenet_bn1')
         # bn1 = tf.contrib.layers.batch_norm(conv1, center=True, scale=True, is_training=trn_Flag, scope='lenet_bn1')
         max1 = _max_pool_2d(bn1, 2, 2, 2, 2, name='lenet_conv1_pool')

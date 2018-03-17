@@ -182,7 +182,8 @@ def _fc(_input, out_dim, name="fc", relu_flag=True, stddev=0.01, dtype=dtypes.fl
         else:
             return act
 
-def _dropout(_input, keep_prob=0.5, trn_flag=True, name="dropout"):
+
+def _dropout(_input, trn_flag, keep_prob=0.5, name="dropout"):
     """
     A wrapped dropout operation used for CNN
     :param _input: tensor or a list of tensor

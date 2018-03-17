@@ -9,9 +9,9 @@ from tensorflow.python.ops import variable_scope
 __all__ = ['vggm']
 
 
-def vggm(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False, name='vggm'):
+def vggm(_input, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False, name='vggm'):
     with variable_scope.variable_scope(name):
-        conv2 = _conv2d(frame_imgs, 96, 1, 1, 1, 1, name='vggm_conv2')
+        conv2 = _conv2d(_input, 96, 1, 1, 1, 1, name='vggm_conv2')
         bn2 = _batch_norm(conv2, trnFlag=trn_Flag, name='vggm_bn2')
         relu2 = _relu(bn2, name='vggm_relu2')
         pool2 = _max_pool_2d(relu2, 3, 3, 2, 2, name='vggm_pool2')

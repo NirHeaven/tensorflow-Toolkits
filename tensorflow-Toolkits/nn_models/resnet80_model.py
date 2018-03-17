@@ -8,10 +8,10 @@ from tensorflow.python.ops import variable_scope
 
 __all__ = ['resnet80']
 
-def resnet80(frame_imgs, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False, name='resnet80'):
+def resnet80(_input, trn_Flag, keep_prob=0.5, out_channels=10, return_fea_map=False, name='resnet80'):
     # input_layer = tf.reshape(frame_imgs, shape=[-1, target_height, target_width, img_channel])
     with variable_scope.variable_scope(name):
-        bn1 = _batch_norm(frame_imgs, trnFlag=trn_Flag, name='resnet80_bn1')
+        bn1 = _batch_norm(_input, trnFlag=trn_Flag, name='resnet80_bn1')
 
         conv_pre = _conv2d(bn1, 32, 7, 7, 2, 2, name='resnet80_conv')
         max_pre = _max_pool_2d(conv_pre, 3, 3, sh=2, sw=2, name='resnet80_pool_pre')
