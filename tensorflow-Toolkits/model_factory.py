@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# 2018.3.14;
+# 2018.3.25;
 # Copyright (C) 2017 Shuang Yang, Mingmin Yang /@
 
 from nn_models import *
@@ -65,14 +65,15 @@ class model_assemble(object):
     def inference(self):
         f_output = None
         for c, component in enumerate(self._layers_list):
+            cpt_name = 'component_%d' % (c + 1)
             if c == 0:
-                f_output = component(**self._params['component_' + str(c + 1)])
+                f_output = component(**self._params[cpt_name])
 
             else:
-                if 'shape' in self._params['component_' + str(c + 1)]:
-                    f_output = tf.reshape(f_output, self._params['component_' + str(c + 1)]['shape'])
-                    self._params['component_' + str(c + 1)].pop('shape')
-                f_output = component(f_output, **self._params['component_' + str(c + 1)])
+                if 'shape' in self._params[cpt_name]:
+                    f_output = tf.reshape(f_output, self._params[cpt_name]['shape'])
+                    self._params[cpt_name].pop('shape')
+                f_output = component(f_output, **self._params[cpt_name])
         if self._logit_shape:
             self._logits = tf.reshape(f_output, self._logit_shape)
         else:
